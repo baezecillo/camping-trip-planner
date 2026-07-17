@@ -122,7 +122,7 @@ its checklist items automatically.
 
 ## Frontend Component Breakdown
 
-```Plain
+```text
 App
 ├── LoginPage            (username/password form, calls /api/auth/login)
 ├── RegisterPage
