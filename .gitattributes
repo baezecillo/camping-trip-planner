@@ -1,0 +1,21 @@
+# Auto-detect text files and normalize line endings to LF in the repo.
+* text=auto eol=lf
+
+# Shell/wrapper scripts must always be LF, even on Windows checkouts,
+# or they break when run inside Linux containers (Docker, WSL2).
+*.sh text eol=lf
+gradlew text eol=lf
+mvnw text eol=lf
+
+# Windows batch scripts should stay CRLF.
+*.bat text eol=crlf
+gradlew.bat text eol=crlf
+mvnw.cmd text eol=crlf
+
+# Binary files — do not let Git touch line endings at all.
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
