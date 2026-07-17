@@ -74,8 +74,6 @@ actually builds and passes its tests, or a safety cap is hit.
 
 Saved at: `scripts/build-loop.sh`
 
-Make it executable before first use: `chmod +x scripts/build-loop.sh`
-
 ## How This Maps to the Assignment's Loop Requirement
 
 The professor's example was "a loop for plan and build." This script
