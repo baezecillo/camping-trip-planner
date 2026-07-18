@@ -8,13 +8,22 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 MAX_ITERATIONS=5
+MAX_TURNS_PER_CALL=25        # primary guardrail — relevant to Pro/Max subscriptions
+MAX_BUDGET_USD_PER_CALL=3.00 # secondary guardrail — cost-equivalent ceiling, tracked either way
 TASK_PROMPT="$1"
 BACKEND_DIR="backend"
 LOG_FILE="docs/step1-base-system/03-build.md"
 PROMPTS_FILE="prompts.txt"
 
+if ! command -v jq &> /dev/null; then
+  echo "jq is required to parse Claude Code's JSON output. Install it with:"
+  echo "  sudo apt install -y jq"
+  exit 1
+fi
+
 iteration=1
 feedback=""
+total_cost="0"
 
 echo "=== Build loop started: $(date) ===" >> "$LOG_FILE"
 
@@ -42,10 +51,29 @@ $feedback"
     echo ""
   } >> "$PROMPTS_FILE"
 
-  # 2. ACT — invoke the agent non-interactively
-  claude -p "$prompt" \
+  # 2. ACT — invoke the agent non-interactively, with turn/budget guardrails
+  claude_json=$(claude -p "$prompt" \
     --allowedTools "Read,Edit,Write,Bash" \
-    --permission-mode acceptEdits
+    --permission-mode acceptEdits \
+    --max-turns "$MAX_TURNS_PER_CALL" \
+    --max-budget-usd "$MAX_BUDGET_USD_PER_CALL" \
+    --output-format json)
+
+  # Surface the agent's own summary to the terminal for visibility
+  echo "$claude_json" | jq -r '.result // "(no result text returned)"'
+
+  iter_cost=$(echo "$claude_json" | jq -r '.total_cost_usd // 0')
+  iter_turns=$(echo "$claude_json" | jq -r '.num_turns // "unknown"')
+  is_error=$(echo "$claude_json" | jq -r '.is_error // false')
+  total_cost=$(echo "$total_cost + $iter_cost" | bc)
+
+  {
+    echo "**Iteration $iteration agent call:** turns=$iter_turns, cost=\$${iter_cost}, is_error=${is_error}"
+  } >> "$LOG_FILE"
+
+  if [ "$is_error" = "true" ]; then
+    echo "⚠️  Claude Code reported an error for iteration $iteration (see $LOG_FILE / prompts.txt)" | tee -a "$LOG_FILE"
+  fi
 
   # 3. VERIFY — external, ground-truth check
   build_output=$(cd "$BACKEND_DIR" && ./gradlew build test 2>&1)
@@ -55,6 +83,7 @@ $feedback"
 
   if [ "$exit_code" -eq 0 ]; then
     echo "✅ Build + tests passed on iteration $iteration" | tee -a "$LOG_FILE"
+    echo "**Total loop cost: \$${total_cost}**" | tee -a "$LOG_FILE"
     exit 0
   fi
 
@@ -64,5 +93,6 @@ $feedback"
 done
 
 echo "🛑 Max iterations ($MAX_ITERATIONS) reached without a passing build." | tee -a "$LOG_FILE"
+echo "**Total loop cost: \$${total_cost}**" | tee -a "$LOG_FILE"
 echo "Manual intervention required — see $LOG_FILE for the last failure."
 exit 1
