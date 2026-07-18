@@ -4,6 +4,9 @@
 
 set -uo pipefail
 
+# Anchor to repo root regardless of where this script is invoked from.
+cd "$(dirname "$0")/.."
+
 MAX_ITERATIONS=5
 TASK_PROMPT="$1"
 BACKEND_DIR="backend"
@@ -61,5 +64,5 @@ $feedback"
 done
 
 echo "🛑 Max iterations ($MAX_ITERATIONS) reached without a passing build." | tee -a "$LOG_FILE"
-echo "Manual intervention required — see $LOG_FILE for the last failure." 
+echo "Manual intervention required — see $LOG_FILE for the last failure."
 exit 1
