@@ -1,0 +1,57 @@
+You are implementing the backend for a Spring Boot project called
+"camping-trip-planner". Read docs/step1-base-system/02-design.md in this
+repository first — it contains the full data model (SQL DDL), API
+contract, and the default checklist seed data. Follow it exactly.
+
+Scope: backend only. Do not touch the frontend/ directory or
+docker-compose.yml in this task.
+
+Implement, inside backend/:
+
+1. Gradle project setup (Spring Boot 3.x, Java 21, Gradle Wrapper) with
+   dependencies: Spring Web, Spring Data JPA, Spring Security, MySQL
+   Connector/J, Flyway, and Spring Boot Test (JUnit 5, Spring Security
+   Test, an in-memory or Testcontainers-based test DB — your choice, but
+   justify it briefly in a code comment).
+
+2. Flyway migration(s) under src/main/resources/db/migration creating the
+   three tables exactly as specified in 02-design.md (users, trips,
+   checklist_items), including the unique constraint enforcing one active
+   trip per user.
+
+3. JPA entities: User, Trip, ChecklistItem, matching the schema.
+
+4. Spring Security configuration using session-based auth (not JWT):
+   register endpoint, login endpoint, logout endpoint, password hashing
+   via BCrypt.
+
+5. REST controllers implementing exactly these endpoints, matching the
+   request/response shapes in 02-design.md's API Contract section:
+   - POST /api/auth/register
+   - POST /api/auth/login
+   - POST /api/auth/logout
+   - POST /api/trips
+   - GET /api/trips/current
+   - PATCH /api/checklist/{id}
+   - DELETE /api/trips/current
+
+6. Trip creation must seed the default 16-item checklist (4 categories)
+   exactly as listed in 02-design.md.
+
+7. Enforce authorization: a user must only be able to read/modify their
+   own trip and checklist items (403 otherwise, per the contract).
+
+8. application.yml configured to connect to a MySQL instance at host
+   "mysql", database "campingtrip", using environment variables for
+   credentials (do not hardcode credentials).
+
+9. Write JUnit + Spring Boot Test integration tests covering at minimum:
+   - registering and logging in a user
+   - creating a trip seeds the correct number of checklist items
+   - a second trip creation for the same user fails (409)
+   - toggling a checklist item persists the change
+   - wrap up (DELETE /api/trips/current) removes the trip and its items
+   - a user cannot access another user's trip/checklist items (403)
+
+After implementing, run `./gradlew build test` yourself inside backend/
+and fix any compilation or test failures before finishing your turn.
