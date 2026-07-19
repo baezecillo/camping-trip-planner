@@ -1,0 +1,22 @@
+:root {
+  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: #08060d;
+  background: #fff;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+}
