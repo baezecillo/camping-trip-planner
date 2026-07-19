@@ -1,0 +1,61 @@
+You are implementing the frontend for a project called
+"camping-trip-planner". Read docs/step1-base-system/02-design.md in this
+repository first — it defines the two-screen flow, the component
+breakdown, and the API contract you must call. Follow it exactly.
+
+Scope: frontend only. Do not modify backend/ or docker-compose.yml in
+this task. The backend is already implemented and exposes the API
+described in 02-design.md at http://localhost:8080.
+
+Build the frontend/ directory as a React + Vite single-page app:
+
+1. Project setup: Vite + React (JavaScript, not TypeScript), with a
+   frontend/.env.example placeholder for VITE_GOOGLE_MAPS_KEY (the real
+   frontend/.env is git-ignored; do not commit real keys).
+
+2. All API calls must use `credentials: 'include'` on fetch (or the
+   equivalent on whatever HTTP client you choose) so the session cookie
+   is sent — auth is session-cookie based, not token based. Assume the
+   backend's CORS policy will be updated separately to allow the dev
+   server's origin; you do not need to configure CORS yourself.
+
+3. LoginPage / RegisterPage: simple forms calling POST /api/auth/login
+   and POST /api/auth/register. On successful login, transition to the
+   TripPlanner view.
+
+4. TripPlanner (parent component): on mount, call GET /api/trips/current.
+   - If 404, render SearchScreen.
+   - Otherwise, render TripDetailScreen with the returned trip + checklist.
+
+5. SearchScreen: From, Where, When (start/end date) inputs, and a Go
+   button. On submit, POST /api/trips with those values, then transition
+   to TripDetailScreen using the response.
+
+6. TripDetailScreen, composed of:
+   - WrapUpButton at the top: calls DELETE /api/trips/current, then
+     transitions back to SearchScreen on success.
+   - RouteMap: an <iframe> using the Google Maps Embed API in directions
+     mode, e.g.
+     `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${origin}&destination=${destination}&mode=driving`
+     reading the API key from import.meta.env.VITE_GOOGLE_MAPS_KEY, and
+     origin/destination from the trip data (URL-encode both values).
+   - Countdown: displays the trip's daysUntilStart value as-is (it's
+     already computed server-side — do not recompute it client-side).
+   - Checklist: renders items grouped by category. Each item is a
+     checkbox reflecting isPacked; toggling it calls
+     PATCH /api/checklist/{id} with the new value, and updates local
+     state only after a successful response (don't assume success).
+
+7. Basic component tests using Vitest + React Testing Library (Vite's
+   standard testing pairing) covering at minimum:
+   - SearchScreen renders all four inputs and the Go button
+   - Submitting SearchScreen calls the trips POST endpoint (mock fetch)
+   - TripDetailScreen renders the countdown value and all checklist items
+     grouped by category
+   - Clicking a checklist checkbox calls PATCH with the item's id (mock
+     fetch)
+   - Clicking Wrap Up calls DELETE (mock fetch)
+
+After implementing, run `npm install`, then `npm test -- --run` and
+`npm run build` yourself inside frontend/, and fix any failures before
+finishing your turn.
