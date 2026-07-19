@@ -1,0 +1,28 @@
+You are fixing a CORS configuration gap in the Spring Boot backend for
+"camping-trip-planner" (backend/). The frontend runs on Vite's dev server
+at http://localhost:5173 and calls the backend's API using
+credentials: 'include' (session-cookie auth), but the backend currently
+has no CORS policy, so browser requests from the frontend will fail even
+though curl-based testing worked fine (curl isn't subject to CORS).
+
+Scope: backend only.
+
+Requirements:
+1. Configure CORS to allow origin http://localhost:5173 specifically —
+   do not use a wildcard ("*"), since wildcard origins are incompatible
+   with allowCredentials(true) per the CORS spec and browsers will reject
+   it.
+2. Allow credentials (cookies) to be sent cross-origin.
+3. Allow methods: GET, POST, PATCH, DELETE, OPTIONS.
+4. Allow the Content-Type header at minimum.
+5. Apply this policy to /api/** and make sure it's wired into the
+   existing Spring Security filter chain correctly (a CorsConfigurationSource
+   bean alone is not enough if Spring Security's own filter chain doesn't
+   reference it — verify http.cors(...) is actually enabled in the
+   SecurityFilterChain, not just a standalone WebMvcConfigurer).
+6. Do not change any existing authentication/authorization logic — this
+   is additive, not a security rewrite.
+
+After making the change, run `./gradlew build test` yourself inside
+backend/ and confirm it still passes (this change should not break any
+existing test), then finish your turn.
