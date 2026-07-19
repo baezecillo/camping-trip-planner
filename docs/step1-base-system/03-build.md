@@ -87,3 +87,12 @@ the loop did on each pass.
 
 _(Append here after running `scripts/build-loop.sh` — iteration count,
 final result, and a short note on what the agent fixed each pass.)
+=== Build loop started: Sat Jul 18 20:32:11 EDT 2026 ===
+**Iteration 1 agent call:** turns=26, cost=$1.2803681, is_error=true
+⚠️  Claude Code reported an error for iteration 1 (see docs/step1-base-system/03-build.md / prompts.txt)
+Exit code: 1
+❌ Iteration 1 failed
+**Iteration 2 agent call:** turns=22, cost=$0.6774201999999999, is_error=false
+Exit code: 0
+✅ Build + tests passed on iteration 2
+**Total loop cost: $1.9577882999999999**
