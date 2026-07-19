@@ -60,7 +60,7 @@ Seeded server-side on trip creation (`TripService.createTrip(...)`):
 | Clothing           | Rain jacket, Warm layer, Extra socks, Sturdy shoes                  |
 | Tools & Safety     | First aid kit, Flashlight/headlamp, Multi-tool, Map/compass         |
 
-(16 default items across 4 categories — kept intentionally short for a
+(17 default items across 4 categories — kept intentionally short for a
 course project; easy to expand later without a schema change.)
 
 ## API Contract

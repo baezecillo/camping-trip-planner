@@ -8,12 +8,13 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 MAX_ITERATIONS=5
-MAX_TURNS_PER_CALL=25        # primary guardrail — relevant to Pro/Max subscriptions
+MAX_TURNS_PER_CALL=30        # primary guardrail — relevant to Pro/Max subscriptions
 MAX_BUDGET_USD_PER_CALL=3.00 # secondary guardrail — cost-equivalent ceiling, tracked either way
 TASK_PROMPT="$1"
 BACKEND_DIR="backend"
 LOG_FILE="docs/step1-base-system/03-build.md"
 PROMPTS_FILE="prompts.txt"
+RAW_LOG="docs/step1-base-system/build-loop-raw.jsonl"
 
 if ! command -v jq &> /dev/null; then
   echo "jq is required to parse Claude Code's JSON output. Install it with:"
@@ -61,6 +62,13 @@ $feedback"
 
   # Surface the agent's own summary to the terminal for visibility
   echo "$claude_json" | jq -r '.result // "(no result text returned)"'
+
+  # Persist the full raw response for this iteration — one JSON object per
+  # line, tagged with iteration number and timestamp. This is what makes a
+  # cut-off/truncated call (like a max-turns hit) fully diagnosable later,
+  # instead of just showing up as "(no result text returned)".
+  echo "$claude_json" | jq -c --arg iter "$iteration" --arg ts "$(date -Iseconds)" \
+    '. + {iteration: ($iter | tonumber), logged_at: $ts}' >> "$RAW_LOG"
 
   iter_cost=$(echo "$claude_json" | jq -r '.total_cost_usd // 0')
   iter_turns=$(echo "$claude_json" | jq -r '.num_turns // "unknown"')

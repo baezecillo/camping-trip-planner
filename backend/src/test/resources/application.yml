@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: camping-trip-planner-backend
+  # In-memory H2 (MySQL compatibility mode) for the test classpath — see the
+  # dependency comment in build.gradle for why H2 over Testcontainers here.
+  datasource:
+    url: jdbc:h2:mem:campingtrip;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
