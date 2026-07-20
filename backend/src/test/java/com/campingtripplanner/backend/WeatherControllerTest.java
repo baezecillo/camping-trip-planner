@@ -99,6 +99,14 @@ class WeatherControllerTest {
                         """, MediaType.APPLICATION_JSON));
     }
 
+    private void expectGeocodingNoResultsField() {
+        mockServer.expect(request -> assertThat(request.getURI().toString())
+                        .contains("geocoding-api.open-meteo.com"))
+                .andRespond(withSuccess("""
+                        {"generationtime_ms": 0.88}
+                        """, MediaType.APPLICATION_JSON));
+    }
+
     private void expectForecastSuccess(LocalDate matchingDate) {
         String time = LocalDate.now().atStartOfDay().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         mockServer.expect(request -> assertThat(request.getURI().toString())
@@ -165,9 +173,50 @@ class WeatherControllerTest {
     void geocodingZeroResults_returnsUnavailable() throws Exception {
         MockHttpSession session = registerAndLogin();
         LocalDate startDate = LocalDate.now().plusDays(3);
+        // Destination contains a comma, so the service retries with the truncated string before
+        // giving up - both attempts need to be mocked as returning zero results.
         createTrip(session, startDate, startDate.plusDays(2));
 
         expectGeocodingZeroResults();
+        expectGeocodingZeroResults();
+
+        mockMvc.perform(get("/api/trips/current/weather").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
+
+        mockServer.verify();
+    }
+
+    @Test
+    void geocodingFailsOnFullString_succeedsOnCommaTruncatedRetry() throws Exception {
+        MockHttpSession session = registerAndLogin();
+        LocalDate startDate = LocalDate.now().plusDays(3);
+        // "Cook Forest State Park, PA" - the geocoder doesn't resolve the full string with the
+        // state suffix, but does resolve "Cook Forest State Park" once the suffix is stripped.
+        createTrip(session, startDate, startDate.plusDays(2));
+
+        expectGeocodingNoResultsField();
+        expectGeocodingSuccess();
+        expectForecastSuccess(startDate);
+
+        mockMvc.perform(get("/api/trips/current/weather").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.date").value(startDate.toString()));
+
+        mockServer.verify();
+    }
+
+    @Test
+    void geocodingResponseWithNoResultsField_returnsUnavailableWithoutThrowing() throws Exception {
+        MockHttpSession session = registerAndLogin();
+        LocalDate startDate = LocalDate.now().plusDays(3);
+        createTrip(session, startDate, startDate.plusDays(2));
+
+        // Both the full-string attempt and the comma-truncated retry come back with no
+        // "results" field at all (not even an empty array).
+        expectGeocodingNoResultsField();
+        expectGeocodingNoResultsField();
 
         mockMvc.perform(get("/api/trips/current/weather").session(session))
                 .andExpect(status().isOk())
