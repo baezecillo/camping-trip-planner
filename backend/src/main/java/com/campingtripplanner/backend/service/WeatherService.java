@@ -39,14 +39,17 @@ public class WeatherService {
     }
 
     public WeatherResponse getForecastForTrip(Trip trip) {
+        String destination = trip.getDestination();
         GeocodingResult location;
         try {
-            location = geocode(trip.getDestination());
+            location = geocodeWithFallback(destination);
         } catch (RestClientException ex) {
-            log.warn("Geocoding lookup failed for destination '{}'", trip.getDestination(), ex);
+            log.warn("Weather unavailable for destination '{}': geocoding request failed", destination, ex);
             return WeatherResponse.unavailable();
         }
         if (location == null) {
+            log.warn("Weather unavailable for destination '{}': geocoding returned no results "
+                    + "(case 2 - geocoding failure)", destination);
             return WeatherResponse.unavailable();
         }
 
@@ -54,15 +57,20 @@ public class WeatherService {
         try {
             daily = fetchForecast(location);
         } catch (RestClientException ex) {
-            log.warn("Forecast lookup failed for destination '{}'", trip.getDestination(), ex);
+            log.warn("Weather unavailable for destination '{}': forecast request failed "
+                    + "(case 3 - forecast API failure)", destination, ex);
             return WeatherResponse.unavailable();
         }
         if (daily == null || daily.time() == null) {
+            log.warn("Weather unavailable for destination '{}': forecast response missing daily data "
+                    + "(case 3 - forecast API failure)", destination);
             return WeatherResponse.unavailable();
         }
 
         int index = daily.time().indexOf(trip.getStartDate().toString());
         if (index < 0) {
+            log.warn("Weather unavailable for destination '{}': start date {} is outside the forecast "
+                    + "horizon (case 1 - beyond 16 days)", destination, trip.getStartDate());
             return WeatherResponse.unavailable();
         }
 
@@ -73,6 +81,39 @@ public class WeatherService {
                 valueAt(daily.temperatureMin(), index),
                 valueAt(daily.precipitationProbabilityMax(), index)
         );
+    }
+
+    /**
+     * The geocoder is built for place names/cities and often returns zero results for a specific
+     * "Place Name, State" destination (e.g. "Cook Forest State Park, PA") even though the place
+     * name alone resolves cleanly. If the full string comes back empty, retry once with the
+     * string truncated at the first comma before giving up.
+     */
+    private GeocodingResult geocodeWithFallback(String destination) {
+        log.info("Geocoding destination '{}'", destination);
+        GeocodingResult result = geocode(destination);
+        if (result != null) {
+            log.info("Geocoding succeeded for destination '{}' on first attempt", destination);
+            return result;
+        }
+
+        int commaIndex = destination.indexOf(',');
+        if (commaIndex < 0) {
+            return null;
+        }
+        String truncated = destination.substring(0, commaIndex).trim();
+        if (truncated.isEmpty()) {
+            return null;
+        }
+
+        log.info("Geocoding found no results for destination '{}', retrying with truncated "
+                + "destination '{}'", destination, truncated);
+        result = geocode(truncated);
+        if (result != null) {
+            log.info("Geocoding succeeded for destination '{}' using truncated fallback '{}'",
+                    destination, truncated);
+        }
+        return result;
     }
 
     private GeocodingResult geocode(String destination) {

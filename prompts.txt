@@ -436,3 +436,57 @@ After implementing, run `npm install`, then `npm test -- --run` and
 finishing your turn.
 ```
 
+### Iteration 1 (Mon Jul 20 13:41:16 EDT 2026)
+```
+You are fixing a real bug found during manual testing in the weather
+forecast feature's backend (WeatherService, from Step 2). Read
+docs/step2-extension/02-design.md for context on the existing design.
+
+Confirmed bug (reproduced via curl against the live Open-Meteo geocoding
+API):
+- Geocoding "Cook Forest State Park, PA" (the exact destination string a
+  user typed, including the state suffix) returns ZERO results. The raw
+  response in this case has no "results" field at all —
+  {"generationtime_ms": 0.88} — not an empty array.
+- Geocoding the same string WITHOUT the trailing state suffix —
+  "Cook Forest State Park" — resolves successfully.
+- This means real, valid destinations are being treated as
+  "unavailable" (FR5's fallback case) when they shouldn't be, because
+  the geocoder doesn't handle "Place Name, State" formatting well for
+  non-city place names.
+
+Fix, inside backend/:
+
+1. In WeatherService's geocoding step, if the full destination string
+   returns no results, retry with the string truncated at the first
+   comma (trimmed of whitespace) before falling back to "unavailable".
+   Example: "Cook Forest State Park, PA" -> retry with
+   "Cook Forest State Park".
+
+2. Ensure the geocoding response parsing handles a missing "results"
+   field safely (not just an empty array) — do not let this cause a null
+   pointer exception or an unhandled exception; it should cleanly result
+   in "try the fallback" / "unavailable" the same way an empty array
+   would.
+
+3. Add application-level logging (SLF4J, INFO level) to WeatherService
+   covering: which destination string is being geocoded, whether the
+   first attempt or the comma-truncated fallback succeeded, and a WARN
+   level log for any case that results in "unavailable" — including
+   which of the three degradation cases it was. There is currently NO
+   application logging in this codebase beyond Spring Boot's own
+   framework logs, which made this exact bug hard to diagnose from
+   `docker compose logs backend` alone.
+
+4. Update/add tests covering:
+   - A destination like "Cook Forest State Park, PA" that fails on the
+     first geocoding attempt but succeeds on the comma-truncated retry
+   - A geocoding response with no "results" field at all (not just an
+     empty array) is handled without throwing
+   - Existing tests from the original Test Plan (02-design.md) must
+     still pass unmodified in behavior, only extended if needed
+
+After implementing, run `./gradlew build test` yourself inside backend/
+and fix any compilation or test failures before finishing your turn.
+```
+
