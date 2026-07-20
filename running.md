@@ -118,20 +118,25 @@ Open the URL Vite prints (default: `http://localhost:5173`).
 2. On the search screen, fill in **From**, **Where**, and a date range,
    then click **Go**.
 3. You'll see the trip detail screen: an embedded driving-route map, a
-   countdown to your start date, and a packing checklist grouped by
-   category. Check items off as needed — each toggle is saved
-   immediately.
-4. Click **Wrap Up** at the top to delete the trip and return to the
+   countdown to your start date, a weather forecast card, and a packing
+   checklist grouped by category. Check items off as needed — each
+   toggle is saved immediately.
+4. The **weather card** shows a real forecast if your trip starts within
+   16 days; otherwise it shows "Forecast available closer to your trip."
+   Weather is fetched live on each page load and is never stored.
+5. Click **Wrap Up** at the top to delete the trip and return to the
    search screen.
 
 ## Troubleshooting
 
-| Symptom                                                                         | Likely cause                                                                                                              |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Frontend can't log in / requests silently fail in browser (but curl works)      | CORS — confirm the backend was rebuilt after the CORS fix (`docker compose up --build`)                                   |
-| "Google Maps Platform rejected your request. The provided API key is invalid."  | `frontend/.env` missing/wrong key, or the dev server wasn't restarted after adding it — Vite only reads `.env` at startup |
-| Backend fails to start / Flyway errors on a fresh `docker compose up`           | Try `docker compose down -v` first — a previous failed run may have left MySQL's volume in a bad state                    |
-| `gradlew: Permission denied` (only relevant if running Gradle directly on host) | Run `chmod +x gradlew`                                                                                                    |
+| Symptom                                                                               | Likely cause                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend can't log in / requests silently fail in browser (but curl works)            | CORS — confirm the backend was rebuilt after the CORS fix (`docker compose up --build`)                                                                                                                                                                                                                                                                     |
+| "Google Maps Platform rejected your request. The provided API key is invalid."        | `frontend/.env` missing/wrong key, or the dev server wasn't restarted after adding it — Vite only reads `.env` at startup                                                                                                                                                                                                                                   |
+| Backend fails to start / Flyway errors on a fresh `docker compose up`                 | Try `docker compose down -v` first — a previous failed run may have left MySQL's volume in a bad state                                                                                                                                                                                                                                                      |
+| `gradlew: Permission denied` (only relevant if running Gradle directly on host)       | Run `chmod +x gradlew`                                                                                                                                                                                                                                                                                                                                      |
+| Weather card shows "Forecast available closer to your trip" even for a near-term trip | The destination geocoder can struggle with `"Place Name, State"` formatting for non-city places (e.g. state parks). The backend retries with the string truncated at the first comma, but only one level of fallback — an unusual or very specific destination may still fail. Check `docker compose logs backend` for the geocoding attempt/outcome trail. |
+| Same weather log lines appear twice per page load in dev                              | Expected — React StrictMode double-invokes effects in development only. Confirm with a production build (`npm run build && npm run preview`) if you want to verify it's not duplicated in production.                                                                                                                                                       |
 
 ## Reproducing the Build Loops (optional — for grading transparency)
 
@@ -141,12 +146,19 @@ prompting. To reproduce:
 
 ```bash
 # Requires the Claude Code CLI installed and authenticated (claude --version)
+
+# Step 1 — base system
 ./scripts/build-loop.sh "$(cat prompts/step1-base-system/01-build-initial-task.txt)"
 ./scripts/frontend-build-loop.sh "$(cat prompts/step1-base-system/02-build-frontend-initial-task.txt)"
+
+# Step 2 — weather forecast extension
+./scripts/build-loop.sh "$(cat prompts/step2-extension/01-build-backend-initial-task.txt)" docs/step2-extension
+./scripts/frontend-build-loop.sh "$(cat prompts/step2-extension/02-build-frontend-initial-task.txt)" docs/step2-extension
+./scripts/build-loop.sh "$(cat prompts/step2-extension/03-fix-geocoding-fallback.txt)" docs/step2-extension
 ```
 
 Each run appends its prompts to `prompts.txt` and a per-iteration log to
-`docs/step1-base-system/03-build.md` and
-`docs/step1-base-system/build-loop-raw.jsonl`. See
-`docs/step1-base-system/03-build.md` for the loop's design and a
-description of what each script's stop/safety-cap conditions are.
+`<doc-dir>/03-build.md` and `<doc-dir>/build-loop-raw.jsonl` (defaulting
+to `docs/step1-base-system` if the optional second argument is omitted).
+See `docs/step1-base-system/03-build.md` for the loop's design and a
+description of each script's stop/safety-cap conditions.
