@@ -1,93 +1,103 @@
 # Step 1 — Base System: Review
 
 Save this file at: `docs/step1-base-system/04-review.md`
+(This replaces the earlier backend-only version of this file.)
 
 ## Verification Summary
 
-The base system backend was verified two ways:
+Step 1 was verified in three layers, from narrowest to broadest:
 
-1. **Automated:** `scripts/build-loop.sh`, iteration 2 — `./gradlew clean
-   build test` passing 7/7 tests (register/login, checklist seeding,
-   duplicate-trip 409, checklist toggle, wrap-up cascade, cross-user
-   403/404 isolation). Tests ran against an in-memory H2 database.
+1. **Automated (backend):** `scripts/build-loop.sh` — `./gradlew clean
+   build test`, 7/7 tests passing against H2. Caught and self-corrected a
+   real compile error (non-effectively-final variable in a lambda) across
+   iterations 1→2.
 
-2. **Manual, against real MySQL via `docker compose up --build`:**
-   Full lifecycle exercised with `curl` against the live container stack.
+2. **Automated (frontend):** `scripts/frontend-build-loop.sh` —
+   `npm install && npm test -- --run && npm run build`, all passing.
+   Caught and self-corrected a real gap (no `test` script defined, so
+   required test files hadn't been wired up) across iterations 1→2.
 
-   | Step         | Endpoint                    | Result                                                                                                  |
-   | ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------- |
-   | Register     | `POST /api/auth/register`   | 201, user created                                                                                       |
-   | Login        | `POST /api/auth/login`      | 200, session cookie issued                                                                              |
-   | No trip yet  | `GET /api/trips/current`    | 404, correct message                                                                                    |
-   | Create trip  | `POST /api/trips`           | 201, all 17 checklist items seeded across the correct 4 categories, `daysUntilStart` computed correctly |
-   | Toggle item  | `PATCH /api/checklist/{id}` | 200, and confirmed via a follow-up GET that the change persisted (not just echoed)                      |
-   | Wrap Up      | `DELETE /api/trips/current` | 204                                                                                                     |
-   | Post-wrap-up | `GET /api/trips/current`    | 404 again — confirms cascade delete removed the trip and its checklist items cleanly                    |
+3. **Manual, full stack, real services:**
+   - Backend manually exercised via `curl` against real MySQL through
+     `docker compose up --build` (register → login → 404-when-empty →
+     create trip with 17-item seeded checklist → toggle persists → wrap
+     up cascades → back to 404).
+   - CORS gap identified when testing from an actual browser (curl isn't
+     subject to CORS, so this wasn't caught until real frontend↔backend
+     traffic was tested) — fixed via a single-shot task
+     (`scripts/single-shot.sh`, not the iterative loop, since it was a
+     small well-defined config change) — see Known Issues below.
+   - Full browser walkthrough completed: registered a user, submitted
+     the Where/When/From search, transitioned correctly to the trip
+     detail screen, embedded Google Map rendered the driving route,
+     countdown displayed, checklist rendered grouped by category, and
+     the backend + MySQL confirmed to be receiving and persisting
+     requests throughout.
 
-This second pass matters specifically because the automated test suite
-only exercised H2, not MySQL. Running the real stack surfaced that Flyway
-migrations and JPA mappings are valid against actual MySQL 8.4, not just
-H2's more lenient SQL dialect.
+This three-layer approach mattered in practice: the automated loops
+caught code-level bugs, but the CORS gap only surfaced once real browser
+traffic was involved — automated tests and curl alone would not have
+caught it, since neither is subject to a browser's CORS enforcement.
 
 ## Requirements Traceability (against 01-specify.md)
 
-All FR1–FR13 and NFR1–NFR3 from the specify doc are satisfied:
+All FR1–FR13 and NFR1–NFR3 are now satisfied end-to-end, frontend
+included:
 
-- Auth (FR1–FR3): verified via register/login flow above.
-- Trip creation + checklist seed (FR4–FR7, FR13): verified, 17 items
-  across 4 categories.
-- Trip detail + persistence (FR8–FR12): map/countdown are frontend
-  concerns (Step 1 frontend still pending — see Known Gaps); checklist
-  persistence and Wrap Up cascade verified above.
+- FR1–FR3 (auth): verified via curl and live browser registration/login.
+- FR4–FR7, FR13 (trip creation + checklist seed): verified, 17 items
+  across 4 categories, confirmed both via curl and rendered in-browser.
+- FR8–FR12 (trip detail + persistence): map, countdown, and checklist
+  all confirmed rendering and functioning in a real browser session.
 - NFR1 (`docker compose up`): verified.
-- NFR2 (git-ignored `.env`, committed `.env.example`): in place.
-- NFR3 (no cross-user data leakage): covered by the automated test suite's
-  403/404 isolation test; not manually re-verified with a second user in
-  this pass.
+- NFR2 (git-ignored `.env`, committed `.env.example`, both root and
+  frontend): in place.
+- NFR3 (no cross-user data leakage): covered by automated test; not
+  re-verified manually with a second concurrent user.
 
 ## Known Issues / Discrepancies Found During the Loop
 
-1. **Checklist count inconsistency in the design doc (fixed).**
-   `02-design.md` originally said "16 default items" while its own table
-   listed 17 (4+5+4+4). The build-loop agent caught this while writing
-   tests, correctly treated the table as authoritative, and built against
-   17. The prose was corrected after the fact to match.
+1. **Checklist count inconsistency in the design doc** — found and fixed
+   during the backend loop (see prior review notes; doc now says 17,
+   matching the table).
 
-2. **`application.yaml` credential handling is inconsistent.** Datasource
-   URL and database name (`campingtrip`) are hardcoded rather than
-   templated from environment variables, while username/password *are*
-   parameterized (`${DB_USERNAME}` / `${DB_PASSWORD}`) — an unusual
-   half-and-half approach. Not a functional bug (`docker-compose.yml` was
-   adjusted to match these exact variable names), but worth normalizing
-   later: either template all four values, or hardcode all four for a
-   single-environment course project. Left as-is for Step 1 to avoid
-   re-triggering the build loop for a non-functional cleanup.
+2. **`application.yaml` credential handling is inconsistent** — datasource
+   URL/db name hardcoded, credentials parameterized. Non-blocking,
+   documented as a future cleanup item.
 
-3. **Flyway/MySQL version mismatch warning.** Flyway logged that MySQL 8.4
-   is newer than its officially tested range (latest verified: 8.1).
-   Migrations ran successfully regardless; flagged here in case a future
-   MySQL image bump introduces a real incompatibility.
+3. **Flyway/MySQL version mismatch warning** — MySQL 8.4 exceeds Flyway's
+   officially tested range (8.1). Ran successfully regardless.
 
-4. **Iteration 1 of the build loop hit `--max-turns`,** producing no
-   result text and an `is_error: true` log entry. Root cause: the initial
-   task (bootstrap Gradle Wrapper + full backend + tests in one shot) was
-   too large for the original 25-turn cap. Fixed by raising
-   `MAX_TURNS_PER_CALL` to 30 and adding raw JSONL logging
-   (`docs/step1-base-system/build-loop-raw.jsonl`) so a future truncation
-   is fully diagnosable instead of just showing up as a blank result.
+4. **CORS was not part of the original backend task scope**, and was only
+   discovered once real browser traffic was tested — curl-based
+   verification does not exercise CORS at all, since CORS is a
+   browser-enforced mechanism, not a server-side concept the server
+   itself refuses requests over. Fixed via a single-shot (non-looped)
+   task: added a `CorsConfigurationSource` scoped to `/api/**`, explicitly
+   avoiding a wildcard origin (incompatible with `allowCredentials(true)`
+   per the CORS spec), and wired it into the Spring Security filter chain
+   directly rather than leaving it as a standalone, unreferenced bean.
+
+5. **Google Maps Embed API key setup** — initial "API key is invalid"
+   error in-browser was not a code bug; it was simply that no real key
+   had been provisioned yet. Resolved by creating a Google Cloud project,
+   enabling the Maps Embed API specifically (not the JS SDK), and adding
+   a referrer-restricted key to `frontend/.env`.
 
 ## Known Gaps (deferred, not blockers for Step 1 completion)
 
-- Frontend (React) has not been built yet — Screen 1 and Screen 2 exist
-  only as design artifacts so far, not code.
 - NFR3 (cross-user isolation) verified only via automated test, not a
-  manual two-user curl pass.
-- No CI pipeline runs `build-loop.sh` automatically; it was run manually
-  for this stage.
+  manual two-user browser/curl pass.
+- No CI pipeline runs either build-loop script automatically; both were
+  run manually for this stage.
+- Production API key restrictions (HTTP referrer) are scoped to
+  `localhost:5173` for local dev only; would need updating for any real
+  deployment.
 
 ## Conclusion
 
-The Step 1 **backend** is functionally complete and verified against a
-real MySQL instance via Docker Compose. Frontend implementation is the
-remaining piece before Step 1 as a whole (per the original specify doc)
-is done.
+Step 1 (base system) is complete: backend and frontend both implemented,
+integrated, and verified against real services (MySQL, a real browser)
+rather than mocks or in-memory substitutes alone. The build loop
+(backend and frontend) is documented in `03-build.md`, with full raw
+evidence in `prompts.txt` and `build-loop-raw.jsonl`.
