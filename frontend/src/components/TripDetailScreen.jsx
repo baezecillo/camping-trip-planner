@@ -12,8 +12,10 @@ export default function TripDetailScreen({ trip, onTripEnded, onItemUpdated }) {
         <WrapUpButton onTripEnded={onTripEnded} />
       </div>
       <RouteMap origin={trip.origin} destination={trip.destination} />
-      <Countdown daysUntilStart={trip.daysUntilStart} />
-      <WeatherCard destination={trip.destination} startDate={trip.startDate} />
+      <div className="trip-highlights">
+        <Countdown daysUntilStart={trip.daysUntilStart} />
+        <WeatherCard destination={trip.destination} startDate={trip.startDate} />
+      </div>
       <Checklist items={trip.checklist} onItemUpdated={onItemUpdated} />
     </div>
   );
