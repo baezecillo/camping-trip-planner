@@ -95,3 +95,27 @@ each step's `03-build.md` and a raw `build-loop-raw.jsonl`.
 See `docs/step1-base-system/03-build.md` for the loop's full design
 rationale, and `reflection.md` for what turned out to be the most
 interesting lesson from the exercise.
+
+## Key Commits per Stage
+
+This repo has many commits — the Build stage in particular is spread
+across several, since that's where the build-verify-repeat loop actually
+runs and self-corrects. The commits below are the ones that map directly
+to each required stage of each step:
+
+| Step            | Stage   | Commit                                                                                                          |
+| --------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| 1 — Base System | Specify | [`e3bed23`](https://github.com/baezecillo/camping-trip-planner/commit/e3bed231604d71b858e1463f8327b118b5d10e43) |
+| 1 — Base System | Design  | [`c1b582b`](https://github.com/baezecillo/camping-trip-planner/commit/c1b582b4e70f469565b8c804bdfe94f7b8a5bd96) |
+| 1 — Base System | Build   | [`f63891a`](https://github.com/baezecillo/camping-trip-planner/commit/f63891aa887f21b5dd386de6191868c298f107f8) |
+| 1 — Base System | Review  | [`faeae77`](https://github.com/baezecillo/camping-trip-planner/commit/faeae77c23ad40249451be7e78e87d975c383013) |
+| 2 — Extension   | Specify | [`90b50ad`](https://github.com/baezecillo/camping-trip-planner/commit/90b50ad0747d1990ed08ca53243c32d992595faa) |
+| 2 — Extension   | Design  | [`cdf5dad`](https://github.com/baezecillo/camping-trip-planner/commit/cdf5dad54caa7f3bc450dfdfae4403c61323d2cf) |
+| 2 — Extension   | Build   | [`c64ee98`](https://github.com/baezecillo/camping-trip-planner/commit/c64ee98ff3349ddad9bd75d5a67be7eaaeb25161) |
+| 2 — Extension   | Review  | [`7304c28`](https://github.com/baezecillo/camping-trip-planner/commit/7304c2830bcad2a99d19e03818655602402eb7c1) |
+
+Both Build-stage commits above are the final commit in a short sequence
+(backend loop → frontend loop → a real bug found via manual testing and
+fixed via a second loop run) — the intermediate commits in each sequence
+are additional loop-engineering evidence, not noise. `reflection.md` was
+added in [`092cdda`](https://github.com/baezecillo/camping-trip-planner/commit/092cdda42904e2e76c57887ca51ce7e9e64abfed).
