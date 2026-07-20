@@ -377,3 +377,62 @@ After implementing, run `./gradlew build test` yourself inside backend/
 and fix any compilation or test failures before finishing your turn.
 ```
 
+### Frontend Iteration 1 (Mon Jul 20 13:09:13 EDT 2026)
+```
+You are implementing the WeatherCard component for the frontend of
+"camping-trip-planner". Read docs/step2-extension/02-design.md in this
+repository first — specifically the API Contract and the "Frontend
+Design (NFR3: failure isolation)" section. Follow it exactly. The
+backend endpoint GET /api/trips/current/weather is already implemented
+and live at http://localhost:8080.
+
+Scope: frontend only. Do not modify backend/. Do not modify the
+existing SearchScreen, auth flow, RouteMap, Countdown, or Checklist
+components — this is purely additive to TripDetailScreen.
+
+Implement, inside frontend/:
+
+1. A new WeatherCard component that:
+   - Fetches GET /api/trips/current/weather independently of the main
+     trip fetch — it manages its own loading/data/error state and is
+     NOT bundled into whatever fetch loads the trip/checklist data. Its
+     failure must never block RouteMap, Countdown, or Checklist from
+     rendering.
+   - Uses credentials: 'include' on the fetch, consistent with the
+     rest of the app's session-cookie auth.
+   - Renders the forecast (max/min temperature, precipitation
+     probability, and a human-readable condition derived from the raw
+     WMO weather_code the backend returns) when the response is
+     {"available": true, ...}.
+   - Renders a friendly message (e.g. "Forecast available closer to your
+     trip") when the response is {"available": false}.
+   - Renders a distinct, quiet fallback (e.g. "Weather unavailable right
+     now") if the fetch itself fails outright (network error, non-200,
+     unexpected shape) — this is a second layer of isolation on top of
+     the backend's own graceful degradation, per the design doc.
+
+2. A small WMO weather_code → human description mapping. You don't need
+   every WMO code — cover at minimum: clear/mostly clear, cloudy,
+   fog, rain (light/moderate/heavy), thunderstorm, and snow, with a
+   generic fallback label for any code not explicitly mapped.
+
+3. Wire WeatherCard into TripDetailScreen per the updated component
+   breakdown in 02-design.md, passing the trip's destination and
+   startDate as props (WeatherCard does not need to re-fetch the trip
+   itself).
+
+4. Tests (Vitest + React Testing Library, mocking fetch — no live
+   network calls) covering:
+   - WeatherCard renders forecast data when the response is available
+   - WeatherCard renders the "check back closer to your trip" message
+     when {"available": false}
+   - WeatherCard renders the quiet fallback message on a fetch failure
+   - TripDetailScreen still renders RouteMap, Countdown, and Checklist
+     even when WeatherCard's fetch fails (this is the NFR3 isolation
+     test — it must actually prove the rest of the screen doesn't break)
+
+After implementing, run `npm install`, then `npm test -- --run` and
+`npm run build` yourself inside frontend/, and fix any failures before
+finishing your turn.
+```
+

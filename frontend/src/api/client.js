@@ -71,3 +71,7 @@ export function updateChecklistItem(id, isPacked) {
     body: JSON.stringify({ isPacked }),
   });
 }
+
+export function getCurrentTripWeather() {
+  return request('/api/trips/current/weather');
+}

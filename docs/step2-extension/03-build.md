@@ -28,3 +28,8 @@ count, final result, notes on what the agent fixed each pass.)_
 Exit code: 0
 ✅ Build + tests passed on iteration 1
 **Total loop cost: $.8849425000000001**
+=== Frontend build loop started: Mon Jul 20 13:09:13 EDT 2026 ===
+**Frontend Iteration 1 agent call:** turns=25, cost=$0.4844947, is_error=false
+Exit code: 0
+✅ Frontend install + tests + build passed on iteration 1
+**Total frontend loop cost: $.4844947**
