@@ -8,8 +8,8 @@ export default function ChecklistItem({ item, onItemUpdated }) {
   }
 
   return (
-    <li>
-      <label>
+    <li className={`checklist-item${item.isPacked ? ' is-packed' : ''}`}>
+      <label className="checklist-item-label">
         <input
           type="checkbox"
           checked={item.isPacked}

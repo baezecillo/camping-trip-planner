@@ -5,14 +5,16 @@ export default function RouteMap({ origin, destination }) {
   )}&destination=${encodeURIComponent(destination)}&mode=driving`;
 
   return (
-    <iframe
-      title="Route Map"
-      src={src}
-      width="600"
-      height="450"
-      style={{ border: 0 }}
-      loading="lazy"
-      allowFullScreen
-    />
+    <div className="card route-map">
+      <iframe
+        title="Route Map"
+        src={src}
+        width="600"
+        height="450"
+        style={{ border: 0 }}
+        loading="lazy"
+        allowFullScreen
+      />
+    </div>
   );
 }

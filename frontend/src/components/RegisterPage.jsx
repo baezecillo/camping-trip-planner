@@ -19,30 +19,34 @@ export default function RegisterPage({ onLoggedIn, onShowLogin }) {
   }
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="register-username">Username</label>
-        <input
-          id="register-username"
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
-        />
+    <div className="page">
+      <div className="card">
+        <h1>Register</h1>
+        <form className="form" onSubmit={handleSubmit}>
+          <label className="form-label" htmlFor="register-username">Username</label>
+          <input
+            id="register-username"
+            className="input"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+          />
 
-        <label htmlFor="register-password">Password</label>
-        <input
-          id="register-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
+          <label className="form-label" htmlFor="register-password">Password</label>
+          <input
+            id="register-password"
+            type="password"
+            className="input"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
 
-        <button type="submit">Register</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
-      <button type="button" onClick={onShowLogin}>
-        Already have an account? Log in
-      </button>
+          <button type="submit" className="btn">Register</button>
+        </form>
+        {error && <p role="alert" className="error-text">{error}</p>}
+        <button type="button" className="btn-link" onClick={onShowLogin}>
+          Already have an account? Log in
+        </button>
+      </div>
     </div>
   );
 }

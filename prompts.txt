@@ -490,3 +490,37 @@ After implementing, run `./gradlew build test` yourself inside backend/
 and fix any compilation or test failures before finishing your turn.
 ```
 
+### Single-shot task (Mon Jul 20 16:05:07 EDT 2026)
+```
+You are applying a visual style pass to the existing React frontend of
+"camping-trip-planner". Read docs/ui-polish/style-guide.md in this
+repository first — it contains exact colors, fonts, spacing, and shape
+values. Follow it precisely; do not improvise values not listed there.
+
+Scope: visual/CSS only. Do not change component logic, API calls, state
+management, routing, or any existing test's behavioral assertions.
+Existing tests must still pass — if any test asserts on a specific old
+class name that changes, update only that assertion, nothing else about
+the test.
+
+Apply the style guide consistently across all existing screens and
+components: LoginPage, RegisterPage, SearchScreen, TripDetailScreen
+(RouteMap, Countdown, WeatherCard, Checklist), and WrapUpButton.
+
+Implementation approach:
+1. Define the color/spacing/typography values from the style guide as
+   CSS custom properties (e.g. in a root stylesheet), so they're defined
+   once and reused everywhere — not hardcoded per-component.
+2. Import the two Google Fonts (Barlow Condensed for headings, Source
+   Sans 3 for body text).
+3. Update each component's styling to use these tokens: colors, spacing,
+   border radius, shadows, and touch target sizing as specified.
+4. Buttons, cards, and form inputs should look and feel consistent with
+   each other across all screens — same corner radius, same shadow
+   treatment, same spacing rhythm.
+
+After implementing, run `npm install`, `npm test -- --run`, and
+`npm run build` yourself inside frontend/, and fix any failures before
+finishing your turn.
+```
+
