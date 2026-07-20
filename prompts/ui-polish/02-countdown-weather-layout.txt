@@ -1,0 +1,47 @@
+You are making a layout and visual-style change to the existing
+TripDetailScreen in the frontend of "camping-trip-planner". Read
+docs/ui-polish/style-guide.md first for colors, spacing, and shape
+tokens — reuse them, don't introduce new ad-hoc values.
+
+Scope: visual/layout only. Do not change data fetching, state
+management, or component logic. Do not touch RouteMap or Checklist's
+own internals beyond their position in the layout.
+
+Two changes:
+
+1. LAYOUT: Currently Countdown and WeatherCard are stacked vertically
+   like everything else on the screen. Change this specific pair to sit
+   side by side, each taking roughly half the available width, with a
+   consistent gap between them (use the style guide's spacing scale).
+   RouteMap stays above this pair, Checklist stays below it — only
+   Countdown and WeatherCard become a horizontal pair.
+   - On narrow/mobile viewports (below ~600px), stack them back to
+     vertical instead of forcing a cramped half-width layout — comfort
+     on small screens matters more than a rigid two-column layout.
+   - Both cards in the pair should feel like a matched set: same height
+     where reasonably possible, same card treatment (padding, radius,
+     shadow) per the style guide.
+
+2. WEATHER CARD VISUAL STYLE: Currently WeatherCard is text-only.
+   Redesign it to be more graphical:
+   - A weather icon representing current conditions (sun, cloud, rain,
+     snow, thunderstorm, fog, etc.) — use simple inline SVG icons, not a
+     new icon library dependency, matching the existing WMO
+     weather-code mapping already in the codebase to decide which icon
+     to show.
+   - A large, prominent temperature display (max/min) as the visual
+     focal point of the card, not small body text.
+   - A simple visual treatment for precipitation probability — e.g. a
+     small icon + percentage styled prominently, or a minimal
+     progress-bar-style indicator — something more graphic than a plain
+     sentence, but keep it simple, not a full chart.
+   - The two fallback states (available: false, and the fetch-failure
+     case) should still look intentional and match the card's visual
+     language — e.g. a muted icon + short message — rather than reverting
+     to plain unstyled text in those cases.
+
+After implementing, run `npm install`, `npm test -- --run`, and
+`npm run build` yourself inside frontend/. If any existing test breaks
+because it queried old markup/text that no longer exists, update only
+that specific assertion — do not change what behavior the test is
+actually verifying. Fix any failures before finishing your turn.
