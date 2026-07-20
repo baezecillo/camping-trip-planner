@@ -12,12 +12,12 @@ export default function Checklist({ items, onItemUpdated }) {
   }
 
   return (
-    <div>
+    <div className="card">
       <h2>Checklist</h2>
       {categories.map((category) => (
-        <section key={category}>
+        <section key={category} className="checklist-category">
           <h3>{category}</h3>
-          <ul>
+          <ul className="checklist-list">
             {itemsByCategory.get(category).map((item) => (
               <ChecklistItem
                 key={item.id}

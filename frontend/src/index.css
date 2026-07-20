@@ -1,22 +1,235 @@
 :root {
-  font: 16px/145% system-ui, 'Segoe UI', Roboto, sans-serif;
-  color: #08060d;
-  background: #fff;
+  --color-forest: #2D4A34;
+  --color-forest-dark: #1F3524;
+  --color-trail-brown: #8B5E34;
+  --color-cream: #F7F3EC;
+  --color-card: #FFFFFF;
+  --color-charcoal: #2A2A24;
+  --color-charcoal-muted: #6B6B5F;
+  --color-border: #E0DACB;
+  --color-success: #4A7A4E;
+  --color-error: #A6402F;
+
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-body: 'Source Sans 3', sans-serif;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+
+  --radius-sm: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 2px 8px rgba(42, 42, 36, 0.08);
+
+  font: 400 16px/145% var(--font-body);
+  color: var(--color-charcoal);
+  background: var(--color-cream);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+  font-family: var(--font-body);
 }
 
 #root {
-  max-width: 700px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--space-4) var(--space-3);
 }
 
-form {
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-forest);
+  margin: 0 0 var(--space-2);
+}
+
+h1 { font-size: 32px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+
+p {
+  margin: 0 0 var(--space-2);
+}
+
+.page {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: 320px;
+  gap: var(--space-4);
+}
+
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 100%;
+}
+
+.form-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-charcoal-muted);
+}
+
+.input {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-charcoal);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.input:focus {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 1px;
+}
+
+.btn {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: #fff;
+  background: var(--color-forest);
+}
+
+.btn:hover, .btn:focus-visible {
+  background: var(--color-forest-dark);
+}
+
+.btn-secondary {
+  background: var(--color-trail-brown);
+}
+
+.btn-secondary:hover, .btn-secondary:focus-visible {
+  background: #6f4a29;
+}
+
+.btn-link {
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-trail-brown);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.btn-link:hover, .btn-link:focus-visible {
+  color: var(--color-forest-dark);
+  text-decoration: underline;
+}
+
+.error-text {
+  color: var(--color-error);
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.route-map {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.route-map iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.countdown {
+  text-align: center;
+}
+
+.countdown-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--color-forest);
+  margin: 0;
+}
+
+.checklist-category {
+  margin-top: var(--space-3);
+}
+
+.checklist-category:first-of-type {
+  margin-top: 0;
+}
+
+.checklist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.checklist-item.is-packed {
+  background: rgba(74, 122, 78, 0.08);
+  border-color: var(--color-success);
+}
+
+.checklist-item-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.checklist-item-label input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  accent-color: var(--color-trail-brown);
 }

@@ -25,42 +25,48 @@ export default function SearchScreen({ onTripCreated }) {
   }
 
   return (
-    <div>
-      <h1>Plan a Trip</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="from">From</label>
-        <input
-          id="from"
-          value={origin}
-          onChange={(event) => setOrigin(event.target.value)}
-        />
+    <div className="page search-screen">
+      <div className="card">
+        <h1>Plan a Trip</h1>
+        <form className="form" onSubmit={handleSubmit}>
+          <label className="form-label" htmlFor="from">From</label>
+          <input
+            id="from"
+            className="input"
+            value={origin}
+            onChange={(event) => setOrigin(event.target.value)}
+          />
 
-        <label htmlFor="where">Where</label>
-        <input
-          id="where"
-          value={destination}
-          onChange={(event) => setDestination(event.target.value)}
-        />
+          <label className="form-label" htmlFor="where">Where</label>
+          <input
+            id="where"
+            className="input"
+            value={destination}
+            onChange={(event) => setDestination(event.target.value)}
+          />
 
-        <label htmlFor="start-date">Start date</label>
-        <input
-          id="start-date"
-          type="date"
-          value={startDate}
-          onChange={(event) => setStartDate(event.target.value)}
-        />
+          <label className="form-label" htmlFor="start-date">Start date</label>
+          <input
+            id="start-date"
+            type="date"
+            className="input"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+          />
 
-        <label htmlFor="end-date">End date</label>
-        <input
-          id="end-date"
-          type="date"
-          value={endDate}
-          onChange={(event) => setEndDate(event.target.value)}
-        />
+          <label className="form-label" htmlFor="end-date">End date</label>
+          <input
+            id="end-date"
+            type="date"
+            className="input"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+          />
 
-        <button type="submit">Go</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
+          <button type="submit" className="btn">Go</button>
+        </form>
+        {error && <p role="alert" className="error-text">{error}</p>}
+      </div>
     </div>
   );
 }

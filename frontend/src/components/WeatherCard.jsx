@@ -38,7 +38,7 @@ export default function WeatherCard({ destination, startDate }) {
 
   if (status === 'loading') {
     return (
-      <div>
+      <div className="card">
         <h2>Weather</h2>
         <p>Loading forecast...</p>
       </div>
@@ -47,7 +47,7 @@ export default function WeatherCard({ destination, startDate }) {
 
   if (status === 'error') {
     return (
-      <div>
+      <div className="card">
         <h2>Weather</h2>
         <p>Weather unavailable right now</p>
       </div>
@@ -56,7 +56,7 @@ export default function WeatherCard({ destination, startDate }) {
 
   if (status === 'unavailable') {
     return (
-      <div>
+      <div className="card">
         <h2>Weather</h2>
         <p>Forecast available closer to your trip</p>
       </div>
@@ -64,7 +64,7 @@ export default function WeatherCard({ destination, startDate }) {
   }
 
   return (
-    <div>
+    <div className="card">
       <h2>Weather</h2>
       <p>{describeWeatherCode(weather.weatherCode)}</p>
       <p>High: {weather.temperatureMaxC}°C</p>
