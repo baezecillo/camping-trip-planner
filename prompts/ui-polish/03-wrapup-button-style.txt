@@ -1,0 +1,33 @@
+You are styling the existing WrapUpButton component in the frontend of
+"camping-trip-planner". Read docs/ui-polish/style-guide.md first for
+colors, spacing, and shape tokens — reuse them, don't introduce new
+ad-hoc values.
+
+Scope: visual/CSS only. Do not change WrapUpButton's position on the
+screen (top-right of Screen 2 is correct and should not move), its
+click behavior, or any other component.
+
+Currently WrapUpButton uses the browser's unstyled default button
+appearance and doesn't match the rest of the page's visual language
+(established by the earlier style pass and the Countdown/Weather
+layout work).
+
+Style it as follows:
+- Since Wrap Up is a destructive action (it deletes the trip), do NOT
+  style it as a solid primary button using --color-forest — that
+  treatment should stay reserved for primary actions like the Go
+  button. Instead, use an outlined/ghost style: transparent or
+  near-transparent background, a border and text color using
+  --color-trail-brown or --color-error (pick whichever reads better
+  against the header area), with a subtle filled hover/active state
+  using that same color at low opacity — present and clearly clickable,
+  but visually secondary/cautious rather than competing with primary
+  actions.
+- Border radius, padding, and minimum touch target height (44px)
+  should match the style guide's button conventions used elsewhere.
+- Typography should match other buttons' font treatment from the style
+  guide.
+
+After implementing, run `npm install`, `npm test -- --run`, and
+`npm run build` yourself inside frontend/, and fix any failures before
+finishing your turn.
