@@ -45,6 +45,14 @@ docker compose up --build      # backend + MySQL
 cd frontend && npm install && npm run dev   # frontend dev server
 ```
 
+## Test in Local
+
+Once the backend and frontend are both running, open your browser to
+**http://localhost:5173/**. Register a new account, log in, and you're
+ready to plan a trip.
+
+![camping-trip-planner](./images/camping-trip-planner.png)
+
 ## Repository Structure
 
 ```text
