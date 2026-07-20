@@ -7,7 +7,7 @@ export default function WrapUpButton({ onTripEnded }) {
   }
 
   return (
-    <button type="button" onClick={handleClick}>
+    <button type="button" className="btn-outline-danger" onClick={handleClick}>
       Wrap Up
     </button>
   );
