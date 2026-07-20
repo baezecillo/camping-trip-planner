@@ -175,8 +175,28 @@ p {
   display: block;
 }
 
+.trip-highlights {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.trip-highlights > * {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .trip-highlights {
+    flex-direction: column;
+  }
+}
+
 .countdown {
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .countdown-value {
@@ -184,6 +204,108 @@ p {
   font-weight: 700;
   font-size: 32px;
   color: var(--color-forest);
+  margin: 0;
+}
+
+.weather-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-headline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.weather-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--color-forest);
+  flex-shrink: 0;
+}
+
+.weather-icon-muted {
+  color: var(--color-charcoal-muted);
+}
+
+.weather-temps {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.weather-temp {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-temp-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-charcoal);
+}
+
+.weather-temp-min .weather-temp-value {
+  color: var(--color-charcoal-muted);
+}
+
+.weather-temp-label {
+  font-size: 14px;
+  color: var(--color-charcoal-muted);
+}
+
+.weather-condition {
+  font-weight: 600;
+}
+
+.weather-precip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: auto;
+}
+
+.weather-precip-label {
+  font-size: 14px;
+  color: var(--color-charcoal-muted);
+  white-space: nowrap;
+}
+
+.weather-precip-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.weather-precip-bar-fill {
+  height: 100%;
+  background: var(--color-forest);
+  border-radius: 4px;
+}
+
+.weather-precip-value {
+  font-weight: 600;
+  color: var(--color-charcoal);
+  min-width: 2.5em;
+  text-align: right;
+}
+
+.weather-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-1);
+  padding: var(--space-2) 0;
+}
+
+.weather-fallback p {
+  color: var(--color-charcoal-muted);
   margin: 0;
 }
 
