@@ -1,6 +1,7 @@
 #!/bin/bash
 # Build-verify-repeat loop for the React/Vite frontend.
-# Usage: ./scripts/frontend-build-loop.sh "<initial task prompt>"
+# Usage: ./scripts/frontend-build-loop.sh "<initial task prompt>" [doc-dir]
+#   doc-dir defaults to docs/step1-base-system for backward compatibility.
 
 set -uo pipefail
 
@@ -11,10 +12,11 @@ MAX_ITERATIONS=5
 MAX_TURNS_PER_CALL=30
 MAX_BUDGET_USD_PER_CALL=3.00
 TASK_PROMPT="$1"
+DOC_DIR="${2:-docs/step1-base-system}"
 FRONTEND_DIR="frontend"
-LOG_FILE="docs/step1-base-system/03-build.md"
+LOG_FILE="$DOC_DIR/03-build.md"
 PROMPTS_FILE="prompts.txt"
-RAW_LOG="docs/step1-base-system/build-loop-raw.jsonl"
+RAW_LOG="$DOC_DIR/build-loop-raw.jsonl"
 
 if ! command -v jq &> /dev/null; then
   echo "jq is required to parse Claude Code's JSON output. Install it with:"

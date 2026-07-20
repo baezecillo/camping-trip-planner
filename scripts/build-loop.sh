@@ -1,6 +1,8 @@
 #!/bin/bash
 # Build-verify-repeat loop for the Spring Boot backend.
-# Usage: ./scripts/build-loop.sh "<initial task prompt>"
+# Usage: ./scripts/build-loop.sh "<initial task prompt>" [doc-dir]
+#   doc-dir defaults to docs/step1-base-system for backward compatibility.
+#   Pass e.g. docs/step2-extension for later steps so logs don't collide.
 
 set -uo pipefail
 
@@ -11,10 +13,11 @@ MAX_ITERATIONS=5
 MAX_TURNS_PER_CALL=30        # primary guardrail — relevant to Pro/Max subscriptions
 MAX_BUDGET_USD_PER_CALL=3.00 # secondary guardrail — cost-equivalent ceiling, tracked either way
 TASK_PROMPT="$1"
+DOC_DIR="${2:-docs/step1-base-system}"
 BACKEND_DIR="backend"
-LOG_FILE="docs/step1-base-system/03-build.md"
+LOG_FILE="$DOC_DIR/03-build.md"
 PROMPTS_FILE="prompts.txt"
-RAW_LOG="docs/step1-base-system/build-loop-raw.jsonl"
+RAW_LOG="$DOC_DIR/build-loop-raw.jsonl"
 
 if ! command -v jq &> /dev/null; then
   echo "jq is required to parse Claude Code's JSON output. Install it with:"

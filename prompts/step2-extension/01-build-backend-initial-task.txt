@@ -1,0 +1,42 @@
+You are implementing the weather forecast feature for the Spring Boot
+backend of "camping-trip-planner". Read docs/step2-extension/02-design.md
+in this repository first — it contains the exact provider endpoints, the
+API contract, the graceful-degradation cases, and the test plan. Follow
+it exactly.
+
+Scope: backend only. Do not modify frontend/ in this task. Do not modify
+existing trip/checklist/auth endpoints — this is purely additive.
+
+Implement, inside backend/:
+
+1. A new service (e.g. WeatherService) that:
+   a. Geocodes the trip's destination string via
+      https://geocoding-api.open-meteo.com/v1/search?name={destination}&count=1
+   b. Calls https://api.open-meteo.com/v1/forecast with the resulting
+      lat/lng, daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,
+      forecast_days=16, timezone=auto
+   c. Finds the entry in the response's daily.time array matching the
+      trip's startDate.
+
+2. A new endpoint: GET /api/trips/current/weather, requiring the same
+   session auth as other trip endpoints (401 if not logged in, 404 if no
+   active trip), returning the exact response shapes defined in
+   02-design.md's API Contract section — including the unified
+   {"available": false} shape for ALL THREE degradation cases (beyond
+   16-day horizon, zero geocoding results, forecast API failure). None of
+   these three cases should ever produce a 5xx response.
+
+3. Both external HTTP calls must have an explicit timeout (5 seconds) —
+   do not let a slow external API hang the request.
+
+4. Write tests (mocking the external HTTP calls — do not hit the live
+   Open-Meteo APIs in the test suite) covering exactly the four scenarios
+   listed in 02-design.md's Test Plan section:
+   - Trip within 16 days returns a real forecast
+   - Trip beyond 16 days returns {"available": false}
+   - Geocoding returning zero results returns {"available": false}
+   - A simulated forecast-API failure returns {"available": false}, not
+     a 500
+
+After implementing, run `./gradlew build test` yourself inside backend/
+and fix any compilation or test failures before finishing your turn.
