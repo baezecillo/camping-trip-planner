@@ -70,4 +70,17 @@ describe('TripDetailScreen', () => {
     );
     expect(onTripEnded).toHaveBeenCalled();
   });
+
+  it('still renders RouteMap, Countdown, and Checklist even when the weather fetch fails (NFR3 isolation)', async () => {
+    global.fetch.mockRejectedValue(new Error('network error'));
+
+    render(<TripDetailScreen trip={trip} onTripEnded={() => {}} onItemUpdated={() => {}} />);
+
+    expect(await screen.findByText(/weather unavailable right now/i)).toBeInTheDocument();
+
+    expect(screen.getByTitle('Route Map')).toBeInTheDocument();
+    expect(screen.getByText(/15 days until your trip/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Shelter & Sleeping' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Tent')).toBeInTheDocument();
+  });
 });
